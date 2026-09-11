@@ -86,7 +86,18 @@ H5P.DragNBarElement=function(s,o){function t(t,i,e){var n=this;o.call(this),this
                 style="max-width:1400px;"
                 class="h5p-content lag" data-content-id="1773629327"></div>        
         </div>        
- 
+ <script>
+  var studentName = sessionStorage.getItem('h5p_student_name');
+
+  if (!studentName) {
+    studentName = prompt("Lütfen adınızı veya takma adınızı yazınız:");
+
+    if (studentName) {
+      studentName = studentName.trim();
+      sessionStorage.setItem('h5p_student_name', studentName);
+    }
+  }
+</script>
 <script>
 var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwzOghnnzFMYTVLsN272n_-U3kFmCJhtIO90m40-LaBZvND2caFnIPh_oIo2KbFegOjPg/exec';
 
