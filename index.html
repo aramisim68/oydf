@@ -86,7 +86,10 @@ H5P.DragNBarElement=function(s,o){function t(t,i,e){var n=this;o.call(this),this
                 style="max-width:1400px;"
                 class="h5p-content lag" data-content-id="1773629327"></div>        
         </div>        
- <script>
+
+<script>
+  /* ÖĞRENCİ ADI */
+
   var studentName = sessionStorage.getItem('h5p_student_name');
 
   if (!studentName) {
@@ -98,6 +101,7 @@ H5P.DragNBarElement=function(s,o){function t(t,i,e){var n=this;o.call(this),this
     }
   }
 </script>
+
 <script>
 var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwzOghnnzFMYTVLsN272n_-U3kFmCJhtIO90m40-LaBZvND2caFnIPh_oIo2KbFegOjPg/exec';
 
@@ -116,11 +120,7 @@ var checkH5P = setInterval(function () {
       var stmt = event.data.statement;
 
       /* ÖĞRENCİ ADI */
-      var studentName = '';
-
-      if (stmt.actor && stmt.actor.name) {
-        studentName = stmt.actor.name;
-      }
+      var studentName = sessionStorage.getItem('h5p_student_name') || '';
 
       /* SORU */
       var question = '';
