@@ -91,65 +91,132 @@ H5P.DragNBarElement=function(s,o){function t(t,i,e){var n=this;o.call(this),this
 var GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwzOghnnzFMYTVLsN272n_-U3kFmCJhtIO90m40-LaBZvND2caFnIPh_oIo2KbFegOjPg/exec';
 
 var checkH5P = setInterval(function () {
+
   if (window.H5P && H5P.externalDispatcher) {
+
     clearInterval(checkH5P);
 
     H5P.externalDispatcher.on('xAPI', function (event) {
 
-      if (event.getVerb() === 'answered') {
+      if (event.getVerb() !== 'answered') {
+        return;
+      }
 
-        var stmt = event.data.statement;
+      var stmt = event.data.statement;
 
-        var question = '';
-        var answer = '';
+      /* ÖĞRENCİ ADI */
+      var studentName = '';
 
-        if (stmt.object &&
-            stmt.object.definition &&
-            stmt.object.definition.name) {
-          question = stmt.object.definition.name;
-        }
+      if (stmt.actor && stmt.actor.name) {
+        studentName = stmt.actor.name;
+      }
 
-        if (stmt.result &&
-            stmt.result.response) {
-          answer = stmt.result.response;
-        }
+      /* SORU */
+      var question = '';
 
-        var videoTime = '';
+      if (
+        stmt.object &&
+        stmt.object.definition &&
+        stmt.object.definition.name
+      ) {
+        var nameObject = stmt.object.definition.name;
 
-        try {
-          if (H5P.instances &&
-              H5P.instances[0] &&
-              H5P.instances[0].video) {
-            videoTime = H5P.instances[0].video.getTime();
+        if (typeof nameObject === 'string') {
+          question = nameObject;
+        } else if (nameObject['tr-TR']) {
+          question = nameObject['tr-TR'];
+        } else if (nameObject['en-US']) {
+          question = nameObject['en-US'];
+        } else {
+          var languages = Object.keys(nameObject);
+
+          if (languages.length > 0) {
+            question = nameObject[languages[0]];
           }
-        } catch (e) {}
-
-        var studentName = sessionStorage.getItem('h5p_student_name') || '';
-
-        var data = {
-          studentName: studentName,
-          videoTime: videoTime,
-          question: question,
-          answer: answer
-        };
-
-        var payload = JSON.stringify(data);
-
-        try {
-          navigator.sendBeacon(GOOGLE_SCRIPT_URL, payload);
-        } catch (e) {
-          fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: {
-              'Content-Type': 'text/plain'
-            },
-            body: payload
-          });
         }
       }
+
+      /* CEVAP */
+      var answer = '';
+
+      if (stmt.result && stmt.result.response !== undefined) {
+        answer = stmt.result.response;
+      }
+
+      /* DOĞRU / YANLIŞ */
+      var result = '';
+
+      if (stmt.result && stmt.result.success !== undefined) {
+        result = stmt.result.success ? 'Doğru' : 'Yanlış';
+      }
+
+      /* PUAN */
+      var score = '';
+
+      if (
+        stmt.result &&
+        stmt.result.score &&
+        stmt.result.score.raw !== undefined
+      ) {
+        score = stmt.result.score.raw;
+      }
+
+      /* MAKSİMUM PUAN */
+      var maxScore = '';
+
+      if (
+        stmt.result &&
+        stmt.result.score &&
+        stmt.result.score.max !== undefined
+      ) {
+        maxScore = stmt.result.score.max;
+      }
+
+      /* VİDEO SÜRESİ */
+      var videoTime = '';
+
+      try {
+        if (
+          H5P.instances &&
+          H5P.instances[0] &&
+          H5P.instances[0].video
+        ) {
+          videoTime = H5P.instances[0].video.getTime();
+        }
+      } catch (e) {}
+
+      /* GOOGLE SHEETS'E GÖNDERİLECEK VERİ */
+      var data = {
+        studentName: studentName,
+        videoTime: videoTime,
+        question: question,
+        answer: answer,
+        result: result,
+        score: score,
+        maxScore: maxScore
+      };
+
+      var payload = JSON.stringify(data);
+
+      try {
+        navigator.sendBeacon(GOOGLE_SCRIPT_URL, payload);
+      } catch (e) {
+
+        fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: {
+            'Content-Type': 'text/plain'
+          },
+          body: payload
+        });
+
+      }
+
     });
+
   }
+
 }, 300);
 </script>
 
